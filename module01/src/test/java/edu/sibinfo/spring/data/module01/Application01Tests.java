@@ -32,11 +32,11 @@ public class Application01Tests {
     @Test
     public void contextLoads() {
     }
-    
+
     @Test
     public void clientRegisters() {
         Client client = service.register("A", "B", "7");
-        Client realClient = dao.getById(client.getId());
+        Client realClient = dao.findOne(client.getId());
         assertNotNull(realClient);
         assertEquals("A", realClient.getFirstName());
         assertEquals("B", realClient.getFamilyName());

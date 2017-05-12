@@ -2,12 +2,24 @@ package edu.sibinfo.spring.data.module01.domain;
 
 import java.nio.charset.StandardCharsets;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
 public class Client {
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
-	private final String familyName;
-	private final String firstName;
-	private final String mobile;
+	private String familyName;
+	private String firstName;
+	private String mobile;
 	private byte[] passwordEncoded;
+
+	public Client() {
+		super();
+	}
 
 	public Client(String familyName, String firstName, String mobile) {
 		super();

@@ -21,7 +21,7 @@ public class AppRunner implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		clientService.register("Luke", "Ford", "+79239889568");
-		Client johnSmith = clientService.register("John", "Smith", "+79132354312");
+		Client johnSmith = clientService.register("Степан", "Митяев", "+79132354312");
 		clientService.setPassword(johnSmith, "ad6123s%");
 		clientService.register("Sam", "Bush", "+79239872348");		
 	}

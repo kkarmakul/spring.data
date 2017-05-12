@@ -1,9 +1,11 @@
 package edu.sibinfo.spring.data.module01.dao;
 
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
 import edu.sibinfo.spring.data.module01.domain.Client;
 
-public interface ClientDao {
-	void save(Client client);
+@Repository
+public interface ClientDao extends CrudRepository<Client, Long> {
 
-    Client getById(Long id);
 }
