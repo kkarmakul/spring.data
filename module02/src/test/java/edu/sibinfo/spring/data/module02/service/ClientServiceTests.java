@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import edu.sibinfo.spring.data.module02.AppRunner;
 import edu.sibinfo.spring.data.module02.dao.ClientDao;
 import edu.sibinfo.spring.data.module02.domain.Client;
 import edu.sibinfo.spring.data.module02.service.impl.SmsService;
@@ -26,6 +27,8 @@ public class ClientServiceTests {
     private ClientDao dao;
     @MockBean
     private SmsService smsService;
+    @MockBean
+    private AppRunner appRunner;
     
     @Test
     public void clientRegisters() {
