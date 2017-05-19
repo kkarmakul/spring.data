@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,16 +25,22 @@ import edu.sibinfo.spring.data.module02.service.impl.SmsService;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import({ ClientServiceImpl.class, EncoderConfiguration.class })
 public class ClientServiceCustomContextTests {
     @Autowired
     private ClientService service;
     @Autowired
     private ClientDao dao;
-	@MockBean
-	private SmsService smsService;
+    @Autowired
+    private SmsService smsService;
 
-	@Test
+    @TestConfiguration
+    @Import({ ClientServiceImpl.class, EncoderConfiguration.class })
+    public static class Config {
+    	@MockBean
+    	private SmsService smsService;
+    }
+    
+    @Test
     public void clientRegisters() {
         clientRegistration("A", "B", "7");
     }
