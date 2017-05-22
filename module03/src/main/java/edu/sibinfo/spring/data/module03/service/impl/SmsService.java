@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import edu.sibinfo.spring.data.module03.domain.Client;
 import edu.sibinfo.spring.data.module03.service.ClientRegisteredEvent;
 
 @Service
@@ -14,8 +13,7 @@ public class SmsService {
 
 	@EventListener
 	public void sendRegistrationNotification(ClientRegisteredEvent event) {
-		Client client  = event.getClient();
 		log.info("{} : \"{}, you were registered\"", 
-				client.getMobile(), client.getFirstName());
+				event.getPhone().getNumber(), event.getClient().getFirstName());
 	}
 }

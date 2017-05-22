@@ -8,7 +8,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import edu.sibinfo.spring.data.module03.dao.ClientDao;
+import edu.sibinfo.spring.data.module03.dao.PhoneDao;
+import edu.sibinfo.spring.data.module03.dao.PhoneType;
 import edu.sibinfo.spring.data.module03.domain.Client;
+import edu.sibinfo.spring.data.module03.domain.Phone;
 import edu.sibinfo.spring.data.module03.service.ClientRegisteredEvent;
 import edu.sibinfo.spring.data.module03.service.ClientService;
 
@@ -16,27 +19,45 @@ import edu.sibinfo.spring.data.module03.service.ClientService;
 public class ClientServiceImpl implements ClientService {
 
 	private final ClientDao clientDao;
+	private final PhoneDao phoneDao;
 	private final MessageDigest encoder;
 	private final ApplicationEventPublisher publisher;
 
 	@Autowired
-	public ClientServiceImpl(ClientDao clientDao, MessageDigest encoder, ApplicationEventPublisher publisher) {
+	public ClientServiceImpl(ClientDao clientDao, PhoneDao phoneDao, MessageDigest encoder, ApplicationEventPublisher publisher) {
 		super();
 		this.clientDao = clientDao;
+		this.phoneDao = phoneDao;
 		this.encoder = encoder;
 		this.publisher = publisher;
 	}
 
-	public Client register(String firstName, String familyName, String phone) {
-		Client client = new Client(familyName, firstName, phone);
+	@Override
+	public Client register(String firstName, String familyName, String mobile) {
+		Client client = new Client(familyName, firstName);
 		clientDao.save(client);
-		publisher.publishEvent(new ClientRegisteredEvent(client));
+		Phone phone = new Phone(client, mobile, PhoneType.MOBILE);
+		phoneDao.save(phone);
+		publisher.publishEvent(new ClientRegisteredEvent(client, phone));
 		return client;
+	}
+	
+	@Override
+	public Phone addPhone(Client client, String number, PhoneType phoneType) {
+		Phone phone = new Phone(client, number, phoneType);
+		phoneDao.save(phone);
+		return phone;
 	}
 
 	@Override
 	public void setPassword(Client client, String password) {
 		client.setPassword(encoder.digest(password.getBytes(StandardCharsets.UTF_8)));
 		clientDao.save(client);		
+	}
+
+	@Override
+	public void deleteClient(Client client) {
+		phoneDao.delete(phoneDao.findByClient(client));
+		clientDao.delete(client);
 	}
 }

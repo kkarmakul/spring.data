@@ -2,6 +2,7 @@ package edu.sibinfo.spring.data.module03.domain;
 
 import java.nio.charset.StandardCharsets;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,20 +13,21 @@ public class Client {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
+	@Column(length=31)
 	private String familyName;
+	@Column(length=31)
 	private String firstName;
-	private String mobile;
+	@Column(length=63)
 	private byte[] passwordEncoded;
 
 	public Client() {
 		super();
 	}
 
-	public Client(String familyName, String firstName, String mobile) {
+	public Client(String familyName, String firstName) {
 		super();
 		this.familyName = familyName;
 		this.firstName = firstName;
-		this.mobile = mobile;
 	}
 
 	public Long getId() {
@@ -44,15 +46,10 @@ public class Client {
 		return firstName;
 	}
 
-	public String getMobile() {
-		return mobile;
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Client [familyName=").append(familyName).append(", firstName=").append(firstName)
-				.append(", mobile=").append(mobile);
+		builder.append("Client [familyName=").append(familyName).append(", firstName=").append(firstName);
 		if (passwordEncoded != null)
 			builder.append(", password=[").append(new String(passwordEncoded, StandardCharsets.US_ASCII)).append(']');
 		builder.append("]");

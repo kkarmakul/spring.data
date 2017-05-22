@@ -1,11 +1,11 @@
 package edu.sibinfo.spring.data.module03.service;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
+
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +16,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.sibinfo.spring.data.module03.dao.ClientDao;
+import edu.sibinfo.spring.data.module03.dao.PhoneDao;
+import edu.sibinfo.spring.data.module03.dao.PhoneType;
 import edu.sibinfo.spring.data.module03.domain.Client;
+import edu.sibinfo.spring.data.module03.domain.Phone;
 import edu.sibinfo.spring.data.module03.service.impl.SmsService;
 
 @RunWith(SpringRunner.class)
@@ -27,6 +30,8 @@ public class ClientServiceCustomContextTests {
     private ClientService service;
     @Autowired
     private ClientDao dao;
+    @Autowired
+    private PhoneDao phoneDao;
     @Autowired
     private SmsService smsService;
     
@@ -40,17 +45,58 @@ public class ClientServiceCustomContextTests {
         clientRegistration("А", "Б", "+7");
     }
 
-	private void clientRegistration(String firstName, String familyName, String mobile) {
+	private Client clientRegistration(String firstName, String familyName, String mobile) {
 		Client client = service.register(firstName, familyName, mobile);
-        assertThat(dao.count(), equalTo(1L));
+        assertEquals(1L, dao.count());
         Client realClient = dao.findOne(client.getId());
         assertNotNull(realClient);
         assertEquals(firstName, realClient.getFirstName());
         assertEquals(familyName, realClient.getFamilyName());
-        assertEquals(mobile, realClient.getMobile());
+        
+        assertEquals(1L, phoneDao.count());
+        List<Phone> phones = phoneDao.findByClient(realClient);
+        assertEquals(1L, phones.size());
+        checkPhone(mobile, realClient, phones.get(0), PhoneType.MOBILE);
         
         ArgumentCaptor<ClientRegisteredEvent> captor = ArgumentCaptor.forClass(ClientRegisteredEvent.class); 
         verify(smsService).sendRegistrationNotification(captor.capture());
         assertSame(client, captor.getValue().getClient());
+        return realClient;
+	}
+
+	private void checkPhone(String number, Client client, Phone phone, PhoneType phoneType) {
+		assertNotNull(phone);
+        assertSame(client, phone.getClient());
+        assertEquals(number, phone.getNumber());
+        assertEquals(phoneType, phone.getPhoneType());
+	}
+	
+	@Test 
+	public void addPhonesAllTypes() {
+		registerClientWith3Phones();
+	}
+
+	private Client registerClientWith3Phones() {
+		String mobilePhone = "+701010101";
+		Client client = clientRegistration("Три", "Телефона", mobilePhone);
+		String homePhone = "+702020202";
+		service.addPhone(client, homePhone, PhoneType.HOME);
+		String officePhone = "+703030303";
+		service.addPhone(client, officePhone, PhoneType.OFFICE);
+
+        List<Phone> phones = phoneDao.findByClient(client);
+        assertEquals(3L, phones.size());
+        checkPhone(mobilePhone, client, phones.get(0), PhoneType.MOBILE);
+        checkPhone(homePhone, client, phones.get(1), PhoneType.HOME);
+        checkPhone(officePhone, client, phones.get(2), PhoneType.OFFICE);
+        return client;
+	}
+	
+	@Test
+	public void registerAndDeleteClient() {
+		Client client = registerClientWith3Phones();
+		service.deleteClient(client);
+		assertEquals(0L, dao.count());
+		assertEquals(0L, phoneDao.count());
 	}
 }
