@@ -9,8 +9,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.sibinfo.spring.data.module02.dao.ClientDao;
@@ -18,26 +18,39 @@ import edu.sibinfo.spring.data.module02.domain.Client;
 import edu.sibinfo.spring.data.module02.service.impl.SmsService;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
-public class ClientServiceTests {
-    @Autowired
+@DataJpaTest
+@ContextConfiguration(classes={ClientServiceTestsDaoConfig.class})
+public class ClientServiceTestsDao {
+	
+	@Autowired
     private ClientService service;
     @Autowired
     private ClientDao dao;
-    @MockBean
-    private SmsService smsService;
-    
+    @Autowired
+    private SmsService smsService;		
+     
     @Test
-    public void clientRegisters() {
-        Client client = service.register("A", "B", "7");
+    public void registerAscii() {
+    	register("Joe", "Stone", "+1129038744");
+    }
+
+    @Test
+    public void registerCyrillic() {
+    	register("Леонид", "Ильич", "+70950000001");
+    }
+
+    private void register(String firstName, String lastName, String mobile) {   	
+        Client client = service.register(firstName, lastName, mobile);
+        assertEquals(1, dao.count());
+        
         Client realClient = dao.findOne(client.getId());
         assertNotNull(realClient);
-        assertEquals("A", realClient.getFirstName());
-        assertEquals("B", realClient.getFamilyName());
-        assertEquals("7", realClient.getMobile());
+        assertEquals(firstName, realClient.getFirstName());
+        assertEquals(lastName, realClient.getFamilyName());
+        assertEquals(mobile, realClient.getMobile());
         
         ArgumentCaptor<ClientRegisteredEvent> captor = ArgumentCaptor.forClass(ClientRegisteredEvent.class); 
         verify(smsService).sendRegistrationNotification(captor.capture());
-        assertSame(realClient, captor.getValue().getClient());
+        assertSame(client, captor.getValue().getClient());
     }
 }
