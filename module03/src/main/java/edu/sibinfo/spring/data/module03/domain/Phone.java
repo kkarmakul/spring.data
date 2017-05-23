@@ -8,22 +8,26 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import edu.sibinfo.spring.data.module03.dao.PhoneType;
 
 @Entity
+@Table(name="client_phones")
 public class Phone {
 	@Id
+	@Column(name="id")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(length = 15)
+	@Column(name="phone_number")
 	private String number;
 
 	@ManyToOne
 	private Client client;
 	
 	@Enumerated(EnumType.STRING)
+	@Column(name="phone_type")
 	private PhoneType phoneType;
 	
 	// for Hibernate
