@@ -1,11 +1,16 @@
 package edu.sibinfo.spring.data.module03.domain;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Client {
@@ -15,6 +20,9 @@ public class Client {
 	private String familyName;
 	private String firstName;
 	private byte[] passwordEncoded;
+	
+	@OneToMany(cascade=CascadeType.ALL)
+	private List<Phone> phones;
 
 	public Client() {
 		super();
@@ -24,6 +32,7 @@ public class Client {
 		super();
 		this.familyName = familyName;
 		this.firstName = firstName;
+		this.phones = new ArrayList<Phone>(1);
 	}
 
 	public Long getId() {
@@ -42,12 +51,21 @@ public class Client {
 		return firstName;
 	}
 
+	public List<Phone> getPhones() {
+		return Collections.unmodifiableList(phones);
+	}
+
+	public void addPhone(Phone phone) {
+		this.phones.add(phone);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Client [familyName=").append(familyName).append(", firstName=").append(firstName);
 		if (passwordEncoded != null)
 			builder.append(", password=[").append(new String(passwordEncoded, StandardCharsets.US_ASCII)).append(']');
+		builder.append(", phones: ").append(phones);
 		builder.append("]");
 		return builder.toString();
 	}

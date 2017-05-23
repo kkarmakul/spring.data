@@ -16,7 +16,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.sibinfo.spring.data.module03.dao.ClientDao;
-import edu.sibinfo.spring.data.module03.dao.PhoneDao;
 import edu.sibinfo.spring.data.module03.dao.PhoneType;
 import edu.sibinfo.spring.data.module03.domain.Client;
 import edu.sibinfo.spring.data.module03.domain.Phone;
@@ -30,8 +29,6 @@ public class ClientServiceCustomContextTests {
     private ClientService service;
     @Autowired
     private ClientDao dao;
-    @Autowired
-    private PhoneDao phoneDao;
     @Autowired
     private SmsService smsService;
     
@@ -53,8 +50,7 @@ public class ClientServiceCustomContextTests {
         assertEquals(firstName, realClient.getFirstName());
         assertEquals(familyName, realClient.getFamilyName());
         
-        assertEquals(1L, phoneDao.count());
-        List<Phone> phones = phoneDao.findByClient(realClient);
+        List<Phone> phones = realClient.getPhones();
         assertEquals(1L, phones.size());
         checkPhone(mobile, realClient, phones.get(0), PhoneType.MOBILE);
         
@@ -66,7 +62,6 @@ public class ClientServiceCustomContextTests {
 
 	private void checkPhone(String number, Client client, Phone phone, PhoneType phoneType) {
 		assertNotNull(phone);
-        assertSame(client, phone.getClient());
         assertEquals(number, phone.getNumber());
         assertEquals(phoneType, phone.getPhoneType());
 	}
@@ -84,7 +79,8 @@ public class ClientServiceCustomContextTests {
 		String officePhone = "+703030303";
 		service.addPhone(client, officePhone, PhoneType.OFFICE);
 
-        List<Phone> phones = phoneDao.findByClient(client);
+		Client realClient = dao.findOne(client.getId());
+        List<Phone> phones = realClient.getPhones();
         assertEquals(3L, phones.size());
         checkPhone(mobilePhone, client, phones.get(0), PhoneType.MOBILE);
         checkPhone(homePhone, client, phones.get(1), PhoneType.HOME);
@@ -97,6 +93,5 @@ public class ClientServiceCustomContextTests {
 		Client client = registerClientWith3Phones();
 		service.deleteClient(client);
 		assertEquals(0L, dao.count());
-		assertEquals(0L, phoneDao.count());
 	}
 }
