@@ -54,6 +54,11 @@ public class ClientServiceImpl implements ClientService {
 
 	@Override
 	public void deleteClient(Client client) {
-		clientDao.delete(client);
+		clientDao.delete(clientDao.findOne(client.getId()));
+	}
+
+	@Override
+	public Client findByPhone(String number) {
+		return clientDao.findByPhone(number);
 	}
 }

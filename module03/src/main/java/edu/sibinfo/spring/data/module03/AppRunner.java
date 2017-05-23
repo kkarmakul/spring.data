@@ -26,5 +26,6 @@ public class AppRunner implements ApplicationRunner {
 		clientService.setPassword(johnSmith, "ad6123s%");
 		clientService.register("Sam", "Bush", "+79239872348");
 		clientService.addPhone(johnSmith, "+79138439343", PhoneType.OFFICE);
+		clientService.deleteClient(johnSmith);
 	}
 }
