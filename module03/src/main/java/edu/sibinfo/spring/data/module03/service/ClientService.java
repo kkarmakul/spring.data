@@ -12,4 +12,6 @@ public interface ClientService {
 	Phone addPhone(Client client, String number, PhoneType phoneType);
 	
 	void deleteClient(Client client);
+	
+	Client findByPhone(String number);
 }

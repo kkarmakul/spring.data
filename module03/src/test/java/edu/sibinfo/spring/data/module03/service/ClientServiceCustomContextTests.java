@@ -25,7 +25,8 @@ import edu.sibinfo.spring.data.module03.service.impl.SmsService;
 @DataJpaTest
 @ContextConfiguration(classes=ClientServiceCustomContextTestConfig.class)
 public class ClientServiceCustomContextTests {
-    @Autowired
+    private static final String MOBILE_PHONE = "+701010101";
+	@Autowired
     private ClientService service;
     @Autowired
     private ClientDao dao;
@@ -72,7 +73,7 @@ public class ClientServiceCustomContextTests {
 	}
 
 	private Client registerClientWith3Phones() {
-		String mobilePhone = "+701010101";
+		String mobilePhone = MOBILE_PHONE;
 		Client client = clientRegistration("Три", "Телефона", mobilePhone);
 		String homePhone = "+702020202";
 		service.addPhone(client, homePhone, PhoneType.HOME);
@@ -86,6 +87,12 @@ public class ClientServiceCustomContextTests {
         checkPhone(homePhone, client, phones.get(1), PhoneType.HOME);
         checkPhone(officePhone, client, phones.get(2), PhoneType.OFFICE);
         return client;
+	}
+	
+	@Test
+	public void findClientByPhone() {
+		registerClientWith3Phones();
+		assertNotNull(service.findByPhone(MOBILE_PHONE));
 	}
 	
 	@Test
