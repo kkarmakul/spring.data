@@ -1,5 +1,7 @@
 package edu.sibinfo.spring.data.module03;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,7 +13,7 @@ import edu.sibinfo.spring.data.module03.service.ClientService;
 
 @Component
 public class AppRunner implements ApplicationRunner {
-	
+	Logger log = LoggerFactory.getLogger(AppRunner.class);
 	private final ClientService clientService;
 
 	@Autowired
@@ -22,10 +24,14 @@ public class AppRunner implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		clientService.register("Luke", "Ford", "+79239889568");
-		Client johnSmith = clientService.register("John", "Smith", "+79132354312");
-		clientService.setPassword(johnSmith, "ad6123s%");
+		Client client = clientService.register("John", "Smith", "+79132354312");
 		clientService.register("Sam", "Bush", "+79239872348");
-		clientService.addPhone(johnSmith, "+79138439343", PhoneType.OFFICE);
+		clientService.addPhone(client, "+79138439343", PhoneType.OFFICE);
+		
+		final Client johnSmith = clientService.findByFamilyName("Smith", 
+				c -> c.getPhones().stream().forEach(p -> log.info("{} {} is accsessible by: {}({})", 
+				c.getFamilyName(), c.getFirstName(), p.getNumber(), p.getPhoneType())));
+		clientService.setPassword(johnSmith, "ad6123s%");
 		clientService.deleteClient(johnSmith);
 	}
 }

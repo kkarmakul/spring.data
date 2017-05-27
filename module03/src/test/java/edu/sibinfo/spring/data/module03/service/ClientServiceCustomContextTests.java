@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.sibinfo.spring.data.module03.dao.ClientDao;
 import edu.sibinfo.spring.data.module03.dao.PhoneType;
@@ -25,7 +27,12 @@ import edu.sibinfo.spring.data.module03.service.impl.SmsService;
 @DataJpaTest
 @ContextConfiguration(classes=ClientServiceCustomContextTestConfig.class)
 public class ClientServiceCustomContextTests {
-    private static final String MOBILE_PHONE = "+701010101";
+	
+    private static final String FAMILY_NAME = "Фамилия";
+	private static final String MOBILE_PHONE = "+701010101";
+	private static final String HOME_PHONE = "+702020202";
+	private static final String OFFICE_PHONE = "+703030303";
+	
 	@Autowired
     private ClientService service;
     @Autowired
@@ -35,15 +42,15 @@ public class ClientServiceCustomContextTests {
     
     @Test
     public void clientRegisters() {
-        clientRegistration("A", "B", "7");
+        registerClient("A", "B", "7");
     }
 
     @Test
     public void clientRegistersCyrillic() {
-        clientRegistration("А", "Б", "+7");
+        registerClient("А", "Б", "+7");
     }
 
-	private Client clientRegistration(String firstName, String familyName, String mobile) {
+	private Client registerClient(String firstName, String familyName, String mobile) {
 		Client client = service.register(firstName, familyName, mobile);
         assertEquals(1L, dao.count());
         Client realClient = dao.findOne(client.getId());
@@ -61,41 +68,58 @@ public class ClientServiceCustomContextTests {
         return realClient;
 	}
 
+	@Test 
+	public void addPhonesAllTypes() {
+		Client client = registerClientWith3Phones();
+		checkClientWith3Phones(client);
+	}
+	
 	private void checkPhone(String number, Client client, Phone phone, PhoneType phoneType) {
 		assertNotNull(phone);
         assertEquals(number, phone.getNumber());
         assertEquals(phoneType, phone.getPhoneType());
 	}
 	
-	@Test 
-	public void addPhonesAllTypes() {
-		registerClientWith3Phones();
-	}
-
 	private Client registerClientWith3Phones() {
-		String mobilePhone = MOBILE_PHONE;
-		Client client = clientRegistration("Три", "Телефона", mobilePhone);
-		String homePhone = "+702020202";
-		service.addPhone(client, homePhone, PhoneType.HOME);
-		String officePhone = "+703030303";
-		service.addPhone(client, officePhone, PhoneType.OFFICE);
-
+		Client client = service.register("Три", FAMILY_NAME, MOBILE_PHONE);
+		service.addPhone(client, HOME_PHONE, PhoneType.HOME);
+		service.addPhone(client, OFFICE_PHONE, PhoneType.OFFICE);
+		return client;
+	}
+	
+	private void checkClientWith3Phones(Client client) {
 		Client realClient = dao.findOne(client.getId());
         List<Phone> phones = realClient.getPhones();
         assertEquals(3L, phones.size());
-        checkPhone(mobilePhone, client, phones.get(0), PhoneType.MOBILE);
-        checkPhone(homePhone, client, phones.get(1), PhoneType.HOME);
-        checkPhone(officePhone, client, phones.get(2), PhoneType.OFFICE);
-        return client;
+        checkPhone(MOBILE_PHONE, client, phones.get(0), PhoneType.MOBILE);
+        checkPhone(HOME_PHONE, client, phones.get(1), PhoneType.HOME);
+        checkPhone(OFFICE_PHONE, client, phones.get(2), PhoneType.OFFICE);
 	}
 	
 	@Test
 	public void findClientByPhone() {
 		registerClientWith3Phones();
-		assertNotNull(service.findByPhone(MOBILE_PHONE));
+		checkClientWith3Phones(service.findByPhone(MOBILE_PHONE));
 	}
 	
 	@Test
+	public void findClientByFamilyName() {
+		registerClientWith3Phones();
+		checkClientWith3Phones(service.findByFamilyName(FAMILY_NAME));
+	}
+	
+	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public void findClientByFamilyNameAndConsume() {
+		Client client = registerClientWith3Phones();
+		service.findByFamilyName(FAMILY_NAME, 
+				c -> c.getPhones().forEach(
+						p -> assertNotNull(p.getNumber())));
+		service.deleteClient(client); // Required: not a transactional method
+	}
+	
+	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void registerAndDeleteClient() {
 		Client client = registerClientWith3Phones();
 		service.deleteClient(client);

@@ -1,5 +1,7 @@
 package edu.sibinfo.spring.data.module03.service;
 
+import java.util.function.Consumer;
+
 import edu.sibinfo.spring.data.module03.dao.PhoneType;
 import edu.sibinfo.spring.data.module03.domain.Client;
 import edu.sibinfo.spring.data.module03.domain.Phone;
@@ -14,4 +16,8 @@ public interface ClientService {
 	void deleteClient(Client client);
 	
 	Client findByPhone(String number);
+
+	Client findByFamilyName(String familyName);
+	
+	Client findByFamilyName(String familyName, Consumer<Client> consumer);
 }

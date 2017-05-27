@@ -22,7 +22,7 @@ public class Client {
 	private String firstName;
 	private byte[] passwordEncoded;
 	
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(cascade=CascadeType.ALL)
 	@JoinColumn(name="client_ID")
 	private List<Phone> phones;
 

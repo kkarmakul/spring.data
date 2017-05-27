@@ -2,6 +2,9 @@ package edu.sibinfo.spring.data.module03.service.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.function.Consumer;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -54,11 +57,24 @@ public class ClientServiceImpl implements ClientService {
 
 	@Override
 	public void deleteClient(Client client) {
-		clientDao.delete(clientDao.findOne(client.getId()));
+		clientDao.delete(client.getId()); // clientDao.delete(client) fails in non-transactional context 
 	}
 
 	@Override
 	public Client findByPhone(String number) {
 		return clientDao.findByPhone(number);
+	}
+
+	@Override
+	public Client findByFamilyName(String familyName) {
+		return clientDao.findByFamilyName(familyName);
+	}
+
+	@Transactional
+	@Override
+	public Client findByFamilyName(String familyName, Consumer<Client> consumer) {
+		Client c = clientDao.findByFamilyName(familyName);
+		consumer.accept(c);
+		return c;
 	}
 }
