@@ -7,6 +7,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import edu.sibinfo.spring.data.module04.domain.Client;
 import edu.sibinfo.spring.data.module04.service.ClientService;
 
 @Component
@@ -36,5 +37,9 @@ public class AppRunner implements ApplicationRunner {
 		clientService.register("Joel", "Smith", "+79069450006");
 		clientService.register("Lucas", "Williams", "+79074470007");
 		clientService.register("Sawyer", "Williams", "+79089860008");
+		
+		for (Client c : clientService.search("i o")) {
+			log.info("Found for \"Sm oh\": {}", c);
+		}
 	}
 }

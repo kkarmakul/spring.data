@@ -20,4 +20,6 @@ public interface ClientService {
 	Client findByFamilyName(String familyName);
 	
 	Client findByFamilyName(String familyName, Consumer<Client> consumer);
+
+	Iterable<Client> search(String charactersitics);
 }
