@@ -10,13 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-
 import edu.sibinfo.spring.data.module04.dao.ClientDao;
 import edu.sibinfo.spring.data.module04.dao.PhoneType;
 import edu.sibinfo.spring.data.module04.domain.Client;
 import edu.sibinfo.spring.data.module04.domain.Phone;
-import edu.sibinfo.spring.data.module04.domain.QClient;
 import edu.sibinfo.spring.data.module04.service.ClientRegisteredEvent;
 import edu.sibinfo.spring.data.module04.service.ClientService;
 
@@ -83,23 +80,6 @@ public class ClientServiceImpl implements ClientService {
 
 	@Override
 	public Iterable<Client> search(String charactersitics) {
-		String[] chs = charactersitics.split("\\s+");
-		String familyName = chs[0];
-		BooleanExpression predicate = null; 
-		QClient qClient = QClient.client;
-		if (Character.isUpperCase(familyName.charAt(0))) {
-			predicate = qClient.familyName.startsWith(familyName);
-		} else {
-			predicate = qClient.familyName.contains(familyName);
-		}
-		if (chs.length > 1) {
-			String firstName = chs[1];
-			if (Character.isUpperCase(firstName.charAt(0))) {
-				predicate = predicate.and(qClient.firstName.startsWith(firstName));
-			} else {
-				predicate = predicate.and(qClient.firstName.contains(firstName));
-			}
-		}
-		return clientDao.findAll(predicate);
+		return clientDao.search(charactersitics);
 	}
 }
